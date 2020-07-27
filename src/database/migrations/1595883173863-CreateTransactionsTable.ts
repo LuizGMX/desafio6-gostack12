@@ -24,11 +24,11 @@ export default class CreateTransactionsTable1595883173863 implements MigrationIn
                     },
                     {
                         name: 'type',
-                        type: 'string'                    
+                        type: 'varchar'                    
                     },
                     {
                         name: 'category_id',
-                        type: 'string'
+                        type: 'varchar'
                     },
                     {
                         name: 'created_at',
