@@ -12,7 +12,11 @@ transactionsRouter.get('/', async (request, response) => {
 });
 
 transactionsRouter.post('/', async (request, response) => {
-  // TODO
+  const title = request.body.title;
+  const value = request.body.value;  
+  const type = request.body.type;  
+  const category = request.body.category;
+  return console.log(title, value, type, category);
 });
 
 transactionsRouter.delete('/:id', async (request, response) => {
