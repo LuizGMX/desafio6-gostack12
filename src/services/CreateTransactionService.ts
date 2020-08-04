@@ -1,30 +1,57 @@
-// import AppError from '../errors/AppError';
-import TransactionsRepository from '../repositories/TransactionsRepository';
-import { getCustomRepository } from 'typeorm'
+import { getCustomRepository, getRepository } from 'typeorm';
+
+import AppError from '../errors/AppError';
+
 import Transaction from '../models/Transaction';
+import TransactionRepository from '../repositories/TransactionsRepository';
+
+import Category from '../models/Category';
 
 interface Request {
-  id: string,
-  title: string,
-  value: number,
-  type: 'income' | "outcome",
-  category: string
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+  category: string;
 }
 
 class CreateTransactionService {
-  public async execute({ id, title, value, type, category }: Request): Promise<Transaction> {
+  public async execute({
+    title,
+    value,
+    type,
+    category,
+  }: Request): Promise<Transaction> {
+    const transactionRepository = getCustomRepository(TransactionRepository);
+    const categoriesRepository = getRepository(Category);
 
-    const transactionsRepository = getCustomRepository(TransactionsRepository);
+    if (type === 'outcome') {
+      const { total } = await transactionRepository.getBalance();
 
-    const transaction = transactionsRepository.create({
-      id: id,
-      title: title,
-      value: value,
-      type: type,
-      category: category
+      if (total - value < 0) {
+        throw new AppError('Outcome value extrapolates the avaliable value');
+      }
+    }
+
+    let transactionCategory = await categoriesRepository.findOne({
+      where: { title: category },
     });
 
-    await transactionsRepository.save(transaction);
+    if (!transactionCategory) {
+      transactionCategory = categoriesRepository.create({
+        title: category,
+      });
+      await categoriesRepository.save(transactionCategory);
+    }
+
+    const transaction = transactionRepository.create({
+      title,
+      value,
+      type,
+      category: transactionCategory,
+    });
+
+    await transactionRepository.save(transaction);
+
     return transaction;
   }
 }
