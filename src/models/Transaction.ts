@@ -17,8 +17,11 @@ class Transaction {
   value: number;
 
   @ManyToOne(()=> Category)
-  @JoinColumn({name:'id'})
-  category_id: Category;
+  @JoinColumn({name:'category_id'})
+  category: Category;
+  
+  @Column()
+  category_id: string;
 
   @Column('timestamp with time zone')
   created_at: Date;
